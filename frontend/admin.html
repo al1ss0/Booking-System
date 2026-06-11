@@ -32,9 +32,9 @@
         <i class="bi bi-building nav-icon"></i>
         <span>Salas</span>
       </a>
-      <a class="nav-item" onclick="showTab('alunos', this)">
+      <a class="nav-item" onclick="showTab('professores', this)">
         <i class="bi bi-people nav-icon"></i>
-        <span>Alunos</span>
+        <span>Professores</span>
       </a>
     </nav>
 
@@ -59,7 +59,7 @@
           <div>
             <div class="page-kicker">Painel administrativo</div>
             <h1 class="page-title">Bem-vindo, Admin!</h1>
-            <p class="page-subtitle">Gerencie reservas, salas, laboratórios e alunos cadastrados no sistema.</p>
+            <p class="page-subtitle">Gerencie reservas, salas, laboratórios e professores cadastrados no sistema.</p>
           </div>
           <div class="topbar-actions">
             <button class="btn-secondary" onclick="atualizarDashboard()"><i class="bi bi-arrow-clockwise"></i> Atualizar</button>
@@ -87,8 +87,8 @@
         <div class="stat-card">
           <div class="stat-icon pink"><i class="bi bi-people"></i></div>
           <div>
-            <div class="stat-label">Alunos</div>
-            <div class="stat-value" id="stat-alunos">0</div>
+            <div class="stat-label">Professores</div>
+            <div class="stat-value" id="stat-professores">0</div>
             <div class="stat-caption">Usuários cadastrados</div>
           </div>
         </div>
@@ -104,9 +104,9 @@
           <div class="stat-icon green"><i class="bi bi-building-add"></i></div>
           <div><h3>Nova Sala</h3><p>Cadastre laboratórios e salas.</p></div>
         </div>
-        <div class="quick-card" onclick="showTab('alunos', document.querySelectorAll('.nav-item')[3])">
+        <div class="quick-card" onclick="showTab('professores', document.querySelectorAll('.nav-item')[3])">
           <div class="stat-icon pink"><i class="bi bi-person-plus"></i></div>
-          <div><h3>Novo Aluno</h3><p>Crie acessos para alunos.</p></div>
+          <div><h3>Novo Professor</h3><p>Crie acessos para professores.</p></div>
         </div>
       </section>
 
@@ -194,44 +194,44 @@
       </div>
     </div>
 
-    <!-- ALUNOS -->
-    <div id="tab-alunos" class="tab">
+    <!-- PROFESSORES -->
+    <div id="tab-professores" class="tab">
       <div class="topbar">
         <div>
           <div class="page-kicker">Usuários</div>
-          <h1 class="page-title">Alunos Cadastrados</h1>
-          <p class="page-subtitle">Gerencie os alunos com acesso ao sistema.</p>
+          <h1 class="page-title">Professores Cadastrados</h1>
+          <p class="page-subtitle">Gerencie os professores com acesso ao sistema.</p>
         </div>
       </div>
 
       <div class="content-grid-equal">
         <div class="form-card">
-          <h3>Cadastrar novo aluno</h3>
+          <h3>Cadastrar novo professor</h3>
           <div class="form-section-divider"><span>Dados de acesso</span></div>
           <div class="form-group">
             <label>Nome completo</label>
-            <input type="text" id="aluno-nome" placeholder="Ex: João Silva"/>
+            <input type="text" id="professor-nome" placeholder="Ex: João Silva"/>
           </div>
           <div class="form-group">
             <label>Usuário</label>
-            <input type="text" id="aluno-usuario" placeholder="Ex: joao"/>
+            <input type="text" id="professor-usuario" placeholder="Ex: joao"/>
           </div>
           <div class="form-group">
             <label>Senha</label>
-            <input type="password" id="aluno-senha" placeholder="Mínimo 6 caracteres"/>
+            <input type="password" id="professor-senha" placeholder="Mínimo 6 caracteres"/>
           </div>
           <div class="form-actions">
-            <button class="btn-primary" onclick="cadastrarAluno()"><i class="bi bi-person-plus"></i> Cadastrar Aluno</button>
+            <button class="btn-primary" onclick="cadastrarProfessor()"><i class="bi bi-person-plus"></i> Cadastrar Professor</button>
           </div>
-          <div id="msg-aluno" class="msg hidden"></div>
+          <div id="msg-professor" class="msg hidden"></div>
         </div>
 
         <div class="panel-card">
           <div class="panel-head">
-            <div><h2>Lista de alunos</h2><p>Usuários com perfil aluno</p></div>
-            <button class="btn-secondary" onclick="carregarAlunos()">Atualizar</button>
+            <div><h2>Lista de professores</h2><p>Usuários com perfil professor</p></div>
+            <button class="btn-secondary" onclick="carregarProfessores()">Atualizar</button>
           </div>
-          <div id="lista-alunos" class="student-grid"><div class="loading">Carregando...</div></div>
+          <div id="lista-professores" class="student-grid"><div class="loading">Carregando...</div></div>
         </div>
       </div>
     </div>
@@ -271,9 +271,9 @@
   <script>
     const API = "http://localhost:8000";
     const perfil = localStorage.getItem("perfil");
-    if (!perfil || perfil !== "admin") window.location.href = "login.html";
+    if (!perfil || perfil !== "admin") window.location.href = "index.html";
 
-    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    function logout() { localStorage.clear(); window.location.href = "index.html"; }
 
     function showTab(tab, el) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -283,20 +283,20 @@
       if (tab === 'dashboard') atualizarDashboard();
       if (tab === 'reservas') carregarReservas();
       if (tab === 'salas') carregarSalas();
-      if (tab === 'alunos') carregarAlunos();
+      if (tab === 'professores') carregarProfessores();
     }
 
     async function atualizarDashboard() {
       await fetch(`${API}/reservas/expirar`, { method: "POST" }).catch(() => {});
-      const [salas, reservas, alunos] = await Promise.all([
+      const [salas, reservas, professores] = await Promise.all([
         fetch(`${API}/salas`).then(r => r.json()).catch(() => []),
         fetch(`${API}/reservas`).then(r => r.json()).catch(() => []),
-        fetch(`${API}/alunos`).then(r => r.json()).catch(() => []),
+        fetch(`${API}/professores`).then(r => r.json()).catch(() => []),
       ]);
 
       document.getElementById('stat-salas').textContent = salas.length || 0;
       document.getElementById('stat-reservas-ativas').textContent = reservas.filter(r => r.status === 'ativa').length || 0;
-      document.getElementById('stat-alunos').textContent = alunos.length || 0;
+      document.getElementById('stat-professores').textContent = professores.length || 0;
       renderReservas(reservas.slice(0, 4), 'dashboard-reservas');
       testarCache(false);
     }
@@ -433,45 +433,45 @@
       if (res.ok) { carregarSalas(); atualizarDashboard(); }
     }
 
-    async function cadastrarAluno() {
-      const msg = document.getElementById("msg-aluno");
-      const nome = document.getElementById("aluno-nome").value.trim();
-      const usuario = document.getElementById("aluno-usuario").value.trim().toLowerCase();
-      const senha = document.getElementById("aluno-senha").value;
+    async function cadastrarProfessor() {
+      const msg = document.getElementById("msg-professor");
+      const nome = document.getElementById("professor-nome").value.trim();
+      const usuario = document.getElementById("professor-usuario").value.trim().toLowerCase();
+      const senha = document.getElementById("professor-senha").value;
       if (!nome || !usuario || !senha) { mostrarMsg(msg, "erro", "Preencha todos os campos."); return; }
       if (senha.length < 6) { mostrarMsg(msg, "erro", "Senha deve ter no mínimo 6 caracteres."); return; }
       try {
-        const res = await fetch(`${API}/alunos`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usuario, senha, nome }) });
+        const res = await fetch(`${API}/professores`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usuario, senha, nome }) });
         const data = await res.json();
         if (res.ok) {
-          mostrarMsg(msg, "sucesso", `✓ Aluno cadastrado!`);
-          ["aluno-nome","aluno-usuario","aluno-senha"].forEach(id => document.getElementById(id).value = "");
-          carregarAlunos(); atualizarDashboard();
+          mostrarMsg(msg, "sucesso", `✓ Professor cadastrado!`);
+          ["professor-nome","professor-usuario","professor-senha"].forEach(id => document.getElementById(id).value = "");
+          carregarProfessores(); atualizarDashboard();
         } else mostrarMsg(msg, "erro", data.detail);
       } catch { mostrarMsg(msg, "erro", "Erro de conexão."); }
     }
 
-    async function carregarAlunos() {
-      const lista = document.getElementById('lista-alunos');
+    async function carregarProfessores() {
+      const lista = document.getElementById('lista-professores');
       lista.innerHTML = '<div class="loading">Carregando...</div>';
       try {
-        const alunos = await fetch(`${API}/alunos`).then(r => r.json());
-        if (!alunos.length) { lista.innerHTML = '<div class="empty">Nenhum aluno cadastrado.</div>'; return; }
-        lista.innerHTML = alunos.map(a => `
+        const professores = await fetch(`${API}/professores`).then(r => r.json());
+        if (!professores.length) { lista.innerHTML = '<div class="empty">Nenhum professor cadastrado.</div>'; return; }
+        lista.innerHTML = professores.map(p => `
           <div class="student-card">
             <div class="student-card-main">
-              <div class="user-avatar-inline">${a.nome[0].toUpperCase()}</div>
-              <div><div class="reserva-sala">${a.nome}</div><div class="reserva-local">@${a.usuario}</div></div>
+              <div class="user-avatar-inline">${p.nome[0].toUpperCase()}</div>
+              <div><div class="reserva-sala">${p.nome}</div><div class="reserva-local">@${p.usuario}</div></div>
             </div>
-            <button class="btn-cancel" onclick="excluirAluno('${a.usuario}')">Excluir</button>
+            <button class="btn-cancel" onclick="excluirProfessor('${p.usuario}')">Excluir</button>
           </div>`).join('');
       } catch { lista.innerHTML = '<div class="empty">Erro ao carregar.</div>'; }
     }
-    async function excluirAluno(usuario) {
-      if (!confirm(`Excluir aluno ${usuario}?`)) return;
-      const res = await fetch(`${API}/alunos/${usuario}`, { method: "DELETE" });
+    async function excluirProfessor(usuario) {
+      if (!confirm(`Excluir professor ${usuario}?`)) return;
+      const res = await fetch(`${API}/professores/${usuario}`, { method: "DELETE" });
       const data = await res.json();
-      if (res.ok) { carregarAlunos(); atualizarDashboard(); }
+      if (res.ok) { carregarProfessores(); atualizarDashboard(); }
       else alert(data.detail);
     }
 

@@ -10,7 +10,7 @@ class LoginRequest(BaseModel):
     senha: str
 
 
-class AlunoCadastro(BaseModel):
+class ProfessorCadastro(BaseModel):
     usuario: str
     senha: str
     nome: Optional[str] = None

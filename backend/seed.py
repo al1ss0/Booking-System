@@ -11,8 +11,8 @@ USUARIOS_INICIAIS = [
     },
     {
         "usuario": "alisson",
-        "senha": "aluno123",
-        "perfil": "aluno",
+        "senha": "prof123",
+        "perfil": "professor",
         "nome": "Alisson Bosa",
     },
 ]

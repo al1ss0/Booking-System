@@ -1,13 +1,24 @@
+# Imagem base do Python
 FROM python:3.11-slim
 
+# Evita gerar arquivos .pyc e melhora logs no Docker
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Define a pasta de trabalho dentro do container
 WORKDIR /app
 
+# Copia apenas as dependências primeiro para aproveitar cache do Docker
 COPY requirements.txt .
+
+# Instala as dependências do backend
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copia todo o código do backend para o container
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Expõe a porta usada pela API FastAPI
+EXPOSE 8000
 
-# Arquivo que prepara o ambiente do servidor. Ele usa Python 3.11, instala as dependências do projeto pelo requirements.txt, copia o código da aplicação e inicia a API FastAPI com Uvicorn na porta 8000. 
-# Ele que garante que o backend rode de forma padronizada dentro de um container Docker.
+# Comando padrão para iniciar o backend
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

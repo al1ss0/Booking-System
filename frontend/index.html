@@ -80,7 +80,7 @@
           localStorage.setItem("usuario", data.usuario);
           localStorage.setItem("nome", data.nome);
           localStorage.setItem("perfil", data.perfil);
-          window.location.href = data.perfil === "admin" ? "admin.html" : "aluno.html";
+          window.location.href = data.perfil === "admin" ? "admin.html" : "professor.html";
         } else {
           msg.textContent = data.detail;
           msg.classList.remove("hidden");

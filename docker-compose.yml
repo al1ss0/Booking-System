@@ -76,5 +76,14 @@ services:
     volumes:
       - ./backend:/app
 
+  frontend:
+    image: nginx:alpine
+    container_name: reservas_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+
 volumes:
   pgdata:

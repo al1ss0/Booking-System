@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException
 
 from models import database, usuarios
-from schemas import LoginRequest, AlunoCadastro
+from schemas import LoginRequest, ProfessorCadastro
 from cache import cache_get, cache_set, invalidar_cache_usuarios
 
 router = APIRouter()
 
 
-@router.post("/alunos", status_code=201)
-async def cadastrar_aluno(req: AlunoCadastro):
+@router.post("/professores", status_code=201)
+async def cadastrar_professor(req: ProfessorCadastro):
     if not req.usuario.strip() or not req.senha.strip():
         raise HTTPException(
             status_code=400,
@@ -31,29 +31,29 @@ async def cadastrar_aluno(req: AlunoCadastro):
         usuarios.insert().values(
             usuario=req.usuario,
             senha=req.senha,
-            perfil="aluno",
+            perfil="professor",
             nome=nome,
         )
     )
 
     await invalidar_cache_usuarios()
 
-    return {"mensagem": f"Aluno {nome} cadastrado com sucesso"}
+    return {"mensagem": f"Professor {nome} cadastrado com sucesso"}
 
 
-@router.delete("/alunos/{usuario}")
-async def excluir_aluno(usuario: str):
-    aluno = await database.fetch_one(
+@router.delete("/professores/{usuario}")
+async def excluir_professor(usuario: str):
+    professor = await database.fetch_one(
         usuarios.select().where(usuarios.c.usuario == usuario)
     )
 
-    if not aluno:
+    if not professor:
         raise HTTPException(
             status_code=404,
             detail="Usuário não encontrado",
         )
 
-    if aluno["perfil"] == "admin":
+    if professor["perfil"] == "admin":
         raise HTTPException(
             status_code=403,
             detail="Não é possível excluir o admin",
@@ -65,12 +65,12 @@ async def excluir_aluno(usuario: str):
 
     await invalidar_cache_usuarios()
 
-    return {"mensagem": f"Aluno {usuario} excluído com sucesso"}
+    return {"mensagem": f"Professor {usuario} excluído com sucesso"}
 
 
-@router.get("/alunos")
-async def listar_alunos():
-    cache = await cache_get("usuarios:alunos")
+@router.get("/professores")
+async def listar_professores():
+    cache = await cache_get("usuarios:professores")
 
     if cache:
         return cache
@@ -78,7 +78,7 @@ async def listar_alunos():
     resultado = await database.fetch_all(
         usuarios
         .select()
-        .where(usuarios.c.perfil == "aluno")
+        .where(usuarios.c.perfil == "professor")
         .order_by(usuarios.c.nome)
     )
 
@@ -91,7 +91,7 @@ async def listar_alunos():
         for u in resultado
     ]
 
-    await cache_set("usuarios:alunos", dados, tempo=120)
+    await cache_set("usuarios:professores", dados, tempo=120)
 
     return dados
 
