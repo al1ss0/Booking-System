@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reservas — Admin</title>
+  <link rel="stylesheet" href="dashboard.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <i class="bi bi-mortarboard-fill"></i>
+      <div>
+        <div class="brand-name">BOOKING</div>
+        <div class="brand-sub">System</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" onclick="showTab('dashboard', this)">
+        <i class="bi bi-grid-1x2-fill nav-icon"></i>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" onclick="showTab('reservas', this)">
+        <i class="bi bi-calendar-check nav-icon"></i>
+        <span>Reservas</span>
+      </a>
+      <a class="nav-item" onclick="showTab('salas', this)">
+        <i class="bi bi-building nav-icon"></i>
+        <span>Salas</span>
+      </a>
+      <a class="nav-item" onclick="showTab('alunos', this)">
+        <i class="bi bi-people nav-icon"></i>
+        <span>Alunos</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">A</div>
+        <div>
+          <div class="user-name">Administrador</div>
+          <div class="user-role">Admin</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab active">
+      <section class="hero-panel">
+        <div class="topbar">
+          <div>
+            <div class="page-kicker">Painel administrativo</div>
+            <h1 class="page-title">Bem-vindo, Admin!</h1>
+            <p class="page-subtitle">Gerencie reservas, salas, laboratórios e alunos cadastrados no sistema.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="btn-secondary" onclick="atualizarDashboard()"><i class="bi bi-arrow-clockwise"></i> Atualizar</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="bi bi-building"></i></div>
+          <div>
+            <div class="stat-label">Total de Salas</div>
+            <div class="stat-value" id="stat-salas">0</div>
+            <div class="stat-caption">Espaços cadastrados</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="bi bi-calendar2-check"></i></div>
+          <div>
+            <div class="stat-label">Reservas Ativas</div>
+            <div class="stat-value" id="stat-reservas-ativas">0</div>
+            <div class="stat-caption">Em andamento/agendadas</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon pink"><i class="bi bi-people"></i></div>
+          <div>
+            <div class="stat-label">Alunos</div>
+            <div class="stat-value" id="stat-alunos">0</div>
+            <div class="stat-caption">Usuários cadastrados</div>
+          </div>
+        </div>
+      </section>
+
+      <h2 class="section-title">Ações rápidas</h2>
+      <section class="quick-grid">
+        <div class="quick-card" onclick="showTab('reservas', document.querySelectorAll('.nav-item')[1])">
+          <div class="stat-icon blue"><i class="bi bi-calendar-check"></i></div>
+          <div><h3>Ver Reservas</h3><p>Acompanhe todas as reservas do sistema.</p></div>
+        </div>
+        <div class="quick-card" onclick="showTab('salas', document.querySelectorAll('.nav-item')[2])">
+          <div class="stat-icon green"><i class="bi bi-building-add"></i></div>
+          <div><h3>Nova Sala</h3><p>Cadastre laboratórios e salas.</p></div>
+        </div>
+        <div class="quick-card" onclick="showTab('alunos', document.querySelectorAll('.nav-item')[3])">
+          <div class="stat-icon pink"><i class="bi bi-person-plus"></i></div>
+          <div><h3>Novo Aluno</h3><p>Crie acessos para alunos.</p></div>
+        </div>
+      </section>
+
+      <h2 class="section-title">Reservas recentes</h2>
+      <div class="panel-card">
+        <div id="dashboard-reservas" class="reservas-list"><div class="loading">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- RESERVAS -->
+    <div id="tab-reservas" class="tab">
+      <div class="topbar">
+        <div>
+          <div class="page-kicker">Controle geral</div>
+          <h1 class="page-title">Todas as Reservas</h1>
+          <p class="page-subtitle">Visualize reservas ativas, concluídas e canceladas.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-secondary" onclick="carregarReservas()"><i class="bi bi-arrow-clockwise"></i> Atualizar</button>
+        </div>
+      </div>
+      <div id="lista-reservas" class="reservas-list"><div class="loading">Carregando...</div></div>
+    </div>
+
+    <!-- SALAS -->
+    <div id="tab-salas" class="tab">
+      <div class="topbar">
+        <div>
+          <div class="page-kicker">Espaços</div>
+          <h1 class="page-title">Gerenciar Salas</h1>
+          <p class="page-subtitle">Adicione, edite ou remova salas e laboratórios.</p>
+        </div>
+      </div>
+
+      <div class="content-grid-equal">
+        <div class="form-card">
+          <h3>Adicionar nova sala</h3>
+          <div class="form-section-divider"><span>Informações básicas</span></div>
+          <div class="form-group">
+            <label>Nome da sala</label>
+            <input type="text" id="sala-nome" placeholder="Ex: Laboratório 04"/>
+          </div>
+          <div class="form-row form-row-2-small">
+            <div class="form-group">
+              <label>Capacidade</label>
+              <input type="number" id="sala-cap" placeholder="Ex: 30"/>
+            </div>
+            <div class="form-group">
+              <label>Localização</label>
+              <input type="text" id="sala-local" placeholder="Ex: Bloco A"/>
+            </div>
+          </div>
+          <div class="form-row form-row-2-small">
+            <div class="form-group">
+              <label>Abertura</label>
+              <input type="time" id="sala-abertura" value="08:00"/>
+            </div>
+            <div class="form-group">
+              <label>Fechamento</label>
+              <input type="time" id="sala-fechamento" value="23:00"/>
+            </div>
+          </div>
+          <div class="form-section-divider"><span>Detalhes</span></div>
+          <div class="form-group">
+            <label>Descrição</label>
+            <textarea id="sala-desc" rows="3" placeholder="Equipamentos, estrutura e diferenciais..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Uso recomendado</label>
+            <textarea id="sala-uso" rows="3" placeholder="Aulas práticas, palestras, reuniões..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" onclick="criarSala()"><i class="bi bi-plus-lg"></i> Adicionar Sala</button>
+          </div>
+          <div id="msg-sala" class="msg hidden"></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-head">
+            <div><h2>Salas cadastradas</h2><p>Lista de espaços disponíveis</p></div>
+            <button class="btn-secondary" onclick="carregarSalas()">Atualizar</button>
+          </div>
+          <div id="lista-salas" class="reservas-list"><div class="loading">Carregando...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALUNOS -->
+    <div id="tab-alunos" class="tab">
+      <div class="topbar">
+        <div>
+          <div class="page-kicker">Usuários</div>
+          <h1 class="page-title">Alunos Cadastrados</h1>
+          <p class="page-subtitle">Gerencie os alunos com acesso ao sistema.</p>
+        </div>
+      </div>
+
+      <div class="content-grid-equal">
+        <div class="form-card">
+          <h3>Cadastrar novo aluno</h3>
+          <div class="form-section-divider"><span>Dados de acesso</span></div>
+          <div class="form-group">
+            <label>Nome completo</label>
+            <input type="text" id="aluno-nome" placeholder="Ex: João Silva"/>
+          </div>
+          <div class="form-group">
+            <label>Usuário</label>
+            <input type="text" id="aluno-usuario" placeholder="Ex: joao"/>
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="aluno-senha" placeholder="Mínimo 6 caracteres"/>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" onclick="cadastrarAluno()"><i class="bi bi-person-plus"></i> Cadastrar Aluno</button>
+          </div>
+          <div id="msg-aluno" class="msg hidden"></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-head">
+            <div><h2>Lista de alunos</h2><p>Usuários com perfil aluno</p></div>
+            <button class="btn-secondary" onclick="carregarAlunos()">Atualizar</button>
+          </div>
+          <div id="lista-alunos" class="student-grid"><div class="loading">Carregando...</div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL EDITAR SALA -->
+  <div id="modal-editar-overlay" class="modal-overlay hidden" onclick="fecharModalEditar()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="fecharModalEditar()">✕</button>
+      <h2>Editar Sala</h2>
+
+      <div class="form-section-divider"><span>Informações básicas</span></div>
+      <div class="form-row form-row-2-small">
+        <div class="form-group"><label>Nome</label><input type="text" id="edit-nome" /></div>
+        <div class="form-group"><label>Capacidade</label><input type="number" id="edit-cap" /></div>
+      </div>
+      <div class="form-group"><label>Localização</label><input type="text" id="edit-local" /></div>
+
+      <div class="form-section-divider"><span>Horário</span></div>
+      <div class="form-row form-row-2-small">
+        <div class="form-group"><label>Abertura</label><input type="time" id="edit-abertura" /></div>
+        <div class="form-group"><label>Fechamento</label><input type="time" id="edit-fechamento" /></div>
+      </div>
+
+      <div class="form-section-divider"><span>Detalhes</span></div>
+      <div class="form-group"><label>Descrição</label><textarea id="edit-desc" rows="3"></textarea></div>
+      <div class="form-group"><label>Uso recomendado</label><textarea id="edit-uso" rows="3"></textarea></div>
+
+      <div class="form-actions">
+        <button class="btn-secondary" onclick="fecharModalEditar()">Cancelar</button>
+        <button class="btn-primary" onclick="salvarEdicao()">Salvar alterações</button>
+      </div>
+      <div id="msg-editar" class="msg hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://localhost:8000";
+    const perfil = localStorage.getItem("perfil");
+    if (!perfil || perfil !== "admin") window.location.href = "login.html";
+
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+    function showTab(tab, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      if (el) el.classList.add('active');
+      if (tab === 'dashboard') atualizarDashboard();
+      if (tab === 'reservas') carregarReservas();
+      if (tab === 'salas') carregarSalas();
+      if (tab === 'alunos') carregarAlunos();
+    }
+
+    async function atualizarDashboard() {
+      await fetch(`${API}/reservas/expirar`, { method: "POST" }).catch(() => {});
+      const [salas, reservas, alunos] = await Promise.all([
+        fetch(`${API}/salas`).then(r => r.json()).catch(() => []),
+        fetch(`${API}/reservas`).then(r => r.json()).catch(() => []),
+        fetch(`${API}/alunos`).then(r => r.json()).catch(() => []),
+      ]);
+
+      document.getElementById('stat-salas').textContent = salas.length || 0;
+      document.getElementById('stat-reservas-ativas').textContent = reservas.filter(r => r.status === 'ativa').length || 0;
+      document.getElementById('stat-alunos').textContent = alunos.length || 0;
+      renderReservas(reservas.slice(0, 4), 'dashboard-reservas');
+      testarCache(false);
+    }
+
+    async function testarCache(alertar = true) {
+      try {
+        const res = await fetch(`${API}/cache/status`);
+        const data = await res.json();
+        document.getElementById('stat-cache-caption').textContent = data.redis === 'conectado' ? 'Conectado' : 'Erro no Redis';
+        if (alertar) alert(data.redis === 'conectado' ? 'Redis conectado!' : 'Redis com erro: ' + data.detalhe);
+      } catch {
+        document.getElementById('stat-cache-caption').textContent = 'Indisponível';
+        if (alertar) alert('Não foi possível testar o Redis.');
+      }
+    }
+
+    async function carregarReservas() {
+      const lista = document.getElementById("lista-reservas");
+      lista.innerHTML = '<div class="loading">Carregando...</div>';
+      try {
+        await fetch(`${API}/reservas/expirar`, { method: "POST" });
+        const reservas = await fetch(`${API}/reservas`).then(r => r.json());
+        renderReservas(reservas, 'lista-reservas');
+      } catch { lista.innerHTML = '<div class="empty">Erro ao carregar.</div>'; }
+    }
+
+    function renderReservas(reservas, containerId) {
+      const lista = document.getElementById(containerId);
+      reservas.sort((a, b) => new Date(a.data_inicio) - new Date(b.data_inicio));
+      if (!reservas.length) { lista.innerHTML = '<div class="empty">Nenhuma reserva encontrada.</div>'; return; }
+      lista.innerHTML = reservas.map(r => `
+        <div class="reserva-row ${r.status}">
+          <div class="reserva-col"><div class="reserva-sala">${r.sala_nome}</div><div class="reserva-local">${r.localizacao || '-'}</div></div>
+          <div class="reserva-col"><div class="reserva-data"><i class="bi bi-person"></i> ${r.usuario}</div></div>
+          <div class="reserva-col"><div class="reserva-data">${fmt(r.data_inicio)}</div><div class="reserva-data muted">até ${fmt(r.data_fim)}</div></div>
+          <div class="reserva-col"><span class="badge badge-${r.status}">${r.status === "concluida" ? "CONCLUÍDA" : r.status.toUpperCase()}</span></div>
+          <div class="reserva-col">${r.status === "ativa" ? `<button class="btn-cancel" onclick="cancelar(${r.id})">Cancelar</button>` : ""}</div>
+        </div>`).join('');
+    }
+
+    async function cancelar(id) {
+      if (!confirm(`Cancelar reserva #${id}?`)) return;
+      const res = await fetch(`${API}/reservas/${id}`, { method: "DELETE" });
+      if (res.ok) { carregarReservas(); atualizarDashboard(); }
+    }
+
+    async function carregarSalas() {
+      const lista = document.getElementById("lista-salas");
+      lista.innerHTML = '<div class="loading">Carregando...</div>';
+      try {
+        const salas = await fetch(`${API}/salas`).then(r => r.json());
+        lista.innerHTML = salas.map(s => `
+          <div class="sala-admin-card">
+            <div class="sala-admin-info">
+              <div class="reserva-sala">${s.nome}</div>
+              <div class="reserva-local">${s.localizacao || '-'} · Cap. ${s.capacidade} · ${s.hora_abertura}–${s.hora_fechamento}</div>
+            </div>
+            <div class="sala-admin-horario">
+              <button class="btn-editar" onclick="abrirModalEditar(${s.id})">Editar</button>
+              <button class="btn-cancel" onclick="deletarSala(${s.id})">Remover</button>
+            </div>
+          </div>`).join('');
+      } catch { lista.innerHTML = '<div class="empty">Erro ao carregar.</div>'; }
+    }
+
+    async function criarSala() {
+      const msg = document.getElementById("msg-sala");
+      const nome = document.getElementById("sala-nome").value.trim();
+      const cap = document.getElementById("sala-cap").value;
+      const local = document.getElementById("sala-local").value.trim();
+      const abertura = document.getElementById("sala-abertura").value;
+      const fechamento = document.getElementById("sala-fechamento").value;
+      const descricao = document.getElementById("sala-desc").value.trim();
+      const uso = document.getElementById("sala-uso").value.trim();
+      if (!nome || !cap) { mostrarMsg(msg, "erro", "Preencha nome e capacidade."); return; }
+      if (abertura >= fechamento) { mostrarMsg(msg, "erro", "Horário de abertura deve ser antes do fechamento."); return; }
+      try {
+        const res = await fetch(`${API}/salas`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome, capacidade: Number(cap), localizacao: local, hora_abertura: abertura, hora_fechamento: fechamento, descricao, uso_recomendado: uso }),
+        });
+        if (res.ok) {
+          mostrarMsg(msg, "sucesso", "✓ Sala adicionada!");
+          ["sala-nome","sala-cap","sala-local","sala-desc","sala-uso"].forEach(id => document.getElementById(id).value = "");
+          document.getElementById("sala-abertura").value = "08:00";
+          document.getElementById("sala-fechamento").value = "23:00";
+          carregarSalas(); atualizarDashboard();
+        }
+      } catch { mostrarMsg(msg, "erro", "Erro de conexão."); }
+    }
+
+    let salaEditandoId = null;
+    async function abrirModalEditar(id) {
+      try {
+        const s = await fetch(`${API}/salas/${id}`).then(r => r.json());
+        salaEditandoId = id;
+        document.getElementById("edit-nome").value = s.nome;
+        document.getElementById("edit-cap").value = s.capacidade;
+        document.getElementById("edit-local").value = s.localizacao || "";
+        document.getElementById("edit-abertura").value = s.hora_abertura;
+        document.getElementById("edit-fechamento").value = s.hora_fechamento;
+        document.getElementById("edit-desc").value = s.descricao || "";
+        document.getElementById("edit-uso").value = s.uso_recomendado || "";
+        document.getElementById("msg-editar").className = "msg hidden";
+        document.getElementById("modal-editar-overlay").classList.remove("hidden");
+      } catch { alert("Erro ao carregar sala."); }
+    }
+    function fecharModalEditar() { document.getElementById("modal-editar-overlay").classList.add("hidden"); salaEditandoId = null; }
+    async function salvarEdicao() {
+      const msg = document.getElementById("msg-editar");
+      const abertura = document.getElementById("edit-abertura").value;
+      const fechamento = document.getElementById("edit-fechamento").value;
+      if (abertura >= fechamento) { mostrarMsg(msg, "erro", "Abertura deve ser antes do fechamento."); return; }
+      const payload = {
+        nome: document.getElementById("edit-nome").value.trim(),
+        capacidade: Number(document.getElementById("edit-cap").value),
+        localizacao: document.getElementById("edit-local").value.trim(),
+        hora_abertura: abertura,
+        hora_fechamento: fechamento,
+        descricao: document.getElementById("edit-desc").value.trim(),
+        uso_recomendado: document.getElementById("edit-uso").value.trim(),
+      };
+      try {
+        const res = await fetch(`${API}/salas/${salaEditandoId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (res.ok) { mostrarMsg(msg, "sucesso", "✓ Sala atualizada!"); setTimeout(() => { fecharModalEditar(); carregarSalas(); atualizarDashboard(); }, 900); }
+        else mostrarMsg(msg, "erro", data.detail);
+      } catch { mostrarMsg(msg, "erro", "Erro de conexão."); }
+    }
+    async function deletarSala(id) {
+      if (!confirm("Remover esta sala?")) return;
+      const res = await fetch(`${API}/salas/${id}`, { method: "DELETE" });
+      if (res.ok) { carregarSalas(); atualizarDashboard(); }
+    }
+
+    async function cadastrarAluno() {
+      const msg = document.getElementById("msg-aluno");
+      const nome = document.getElementById("aluno-nome").value.trim();
+      const usuario = document.getElementById("aluno-usuario").value.trim().toLowerCase();
+      const senha = document.getElementById("aluno-senha").value;
+      if (!nome || !usuario || !senha) { mostrarMsg(msg, "erro", "Preencha todos os campos."); return; }
+      if (senha.length < 6) { mostrarMsg(msg, "erro", "Senha deve ter no mínimo 6 caracteres."); return; }
+      try {
+        const res = await fetch(`${API}/alunos`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usuario, senha, nome }) });
+        const data = await res.json();
+        if (res.ok) {
+          mostrarMsg(msg, "sucesso", `✓ Aluno cadastrado!`);
+          ["aluno-nome","aluno-usuario","aluno-senha"].forEach(id => document.getElementById(id).value = "");
+          carregarAlunos(); atualizarDashboard();
+        } else mostrarMsg(msg, "erro", data.detail);
+      } catch { mostrarMsg(msg, "erro", "Erro de conexão."); }
+    }
+
+    async function carregarAlunos() {
+      const lista = document.getElementById('lista-alunos');
+      lista.innerHTML = '<div class="loading">Carregando...</div>';
+      try {
+        const alunos = await fetch(`${API}/alunos`).then(r => r.json());
+        if (!alunos.length) { lista.innerHTML = '<div class="empty">Nenhum aluno cadastrado.</div>'; return; }
+        lista.innerHTML = alunos.map(a => `
+          <div class="student-card">
+            <div class="student-card-main">
+              <div class="user-avatar-inline">${a.nome[0].toUpperCase()}</div>
+              <div><div class="reserva-sala">${a.nome}</div><div class="reserva-local">@${a.usuario}</div></div>
+            </div>
+            <button class="btn-cancel" onclick="excluirAluno('${a.usuario}')">Excluir</button>
+          </div>`).join('');
+      } catch { lista.innerHTML = '<div class="empty">Erro ao carregar.</div>'; }
+    }
+    async function excluirAluno(usuario) {
+      if (!confirm(`Excluir aluno ${usuario}?`)) return;
+      const res = await fetch(`${API}/alunos/${usuario}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) { carregarAlunos(); atualizarDashboard(); }
+      else alert(data.detail);
+    }
+
+    function fmt(iso) { return new Date(iso).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }); }
+    function mostrarMsg(el, tipo, texto) { el.textContent = texto; el.className = `msg ${tipo}`; setTimeout(() => el.className = "msg hidden", 4000); }
+
+    atualizarDashboard();
+  </script>
+</body>
+</html>
