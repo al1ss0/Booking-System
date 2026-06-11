@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from models import database, metadata, engine
 from seed import criar_dados_iniciais
-from backend.cache import (
+from cache import (
     redis_client,
     invalidar_cache_salas,
     invalidar_cache_reservas,

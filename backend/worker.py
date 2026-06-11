@@ -55,5 +55,5 @@ async def main():
     print("✅ Worker conectado e ouvindo a fila 'notificacoes'")
     await asyncio.Future()  # roda para sempre
 
-if _name_ == "_main_":
+if __name__== "__main__":
     asyncio.run(main())
