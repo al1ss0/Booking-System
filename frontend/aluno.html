@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reservas — Aluno</title>
+  <link rel="stylesheet" href="dashboard.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <i class="bi bi-mortarboard-fill"></i>
+      <div>
+        <div class="brand-name">BOOKING</div>
+        <div class="brand-sub">System</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" onclick="showTab('dashboard', this)">
+        <i class="bi bi-grid-1x2-fill nav-icon"></i>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" onclick="showTab('nova', this)">
+        <i class="bi bi-calendar-plus nav-icon"></i>
+        <span>Nova Reserva</span>
+      </a>
+      <a class="nav-item" onclick="showTab('minhas', this)">
+        <i class="bi bi-list-task nav-icon"></i>
+        <span>Minhas Reservas</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div>
+          <div class="user-name" id="user-name">Carregando...</div>
+          <div class="user-role">Aluno</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab active">
+      <section class="hero-panel">
+        <div class="topbar">
+          <div>
+            <div class="page-kicker">Área do aluno</div>
+            <h1 class="page-title">Bem-vindo, <span id="aluno-primeiro-nome">Aluno</span>!</h1>
+            <p class="page-subtitle">Reserve laboratórios e salas de forma rápida, simples e organizada.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="btn-primary" onclick="showTab('nova', document.querySelectorAll('.nav-item')[1])">
+              <i class="bi bi-calendar-plus"></i> Nova Reserva
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+          <div>
+            <div class="stat-label">Minhas Reservas</div>
+            <div class="stat-value" id="stat-minhas">0</div>
+            <div class="stat-caption">Reservas ativas</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="bi bi-clock"></i></div>
+          <div>
+            <div class="stat-label">Próxima Reserva</div>
+            <div class="stat-value" id="stat-proxima">--</div>
+            <div class="stat-caption" id="stat-proxima-sala">Sem reserva ativa</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="bi bi-building"></i></div>
+          <div>
+            <div class="stat-label">Salas Disponíveis</div>
+            <div class="stat-value" id="stat-salas">0</div>
+            <div class="stat-caption">Em todo o campus</div>
+          </div>
+        </div>
+      </section>
+
+      <h2 class="section-title">Ações rápidas</h2>
+      <section class="quick-grid">
+        <div class="quick-card" onclick="showTab('nova', document.querySelectorAll('.nav-item')[1])">
+          <div class="stat-icon"><i class="bi bi-calendar-plus"></i></div>
+          <div><h3>Nova Reserva</h3><p>Reserve um espaço disponível.</p></div>
+        </div>
+        <div class="quick-card" onclick="showTab('minhas', document.querySelectorAll('.nav-item')[2])">
+          <div class="stat-icon blue"><i class="bi bi-list-task"></i></div>
+          <div><h3>Minhas Reservas</h3><p>Veja seu histórico e status.</p></div>
+        </div>
+        <div class="quick-card" onclick="showTab('nova', document.querySelectorAll('.nav-item')[1])">
+          <div class="stat-icon green"><i class="bi bi-building"></i></div>
+          <div><h3>Salas e Labs</h3><p>Explore os espaços cadastrados.</p></div>
+        </div>
+      </section>
+
+      <h2 class="section-title">Próximas reservas</h2>
+      <div class="panel-card">
+        <div id="dashboard-minhas" class="reservas-list"><div class="loading">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- NOVA RESERVA -->
+    <div id="tab-nova" class="tab">
+      <div class="topbar">
+        <div>
+          <div class="page-kicker">Agendamento</div>
+          <h1 class="page-title">Nova Reserva</h1>
+          <p class="page-subtitle">Escolha um espaço, selecione a data e confirme o horário disponível.</p>
+        </div>
+      </div>
+
+      <div class="content-grid-2">
+        <div>
+          <div class="panel-card">
+            <div class="panel-head">
+              <div><h2>Salas disponíveis</h2><p>Selecione uma sala para ver detalhes ou reservar</p></div>
+            </div>
+            <div class="salas-grid" id="salas-grid"><div class="loading">Carregando salas...</div></div>
+          </div>
+        </div>
+
+        <div class="form-card" id="form-reserva">
+          <h3 id="sala-selecionada-nome">Escolha uma sala</h3>
+          <p class="reserva-local" style="margin-bottom:18px">Depois selecione data e horário.</p>
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="data_escolhida" onchange="carregarSlots()" disabled/>
+          </div>
+          <div id="slots-container" style="display:none">
+            <label class="slots-label">Horários disponíveis</label>
+            <div id="slots-grid" class="slots-grid"></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-secondary" onclick="cancelarSelecao()">Limpar</button>
+            <button class="btn-primary" id="btn-confirmar" onclick="criarReserva()" disabled>Confirmar Reserva</button>
+          </div>
+          <div id="msg-reserva" class="msg hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINHAS RESERVAS -->
+    <div id="tab-minhas" class="tab">
+      <div class="topbar">
+        <div>
+          <div class="page-kicker">Histórico</div>
+          <h1 class="page-title">Minhas Reservas</h1>
+          <p class="page-subtitle">Acompanhe suas reservas ativas, concluídas ou canceladas.</p>
+        </div>
+        <div class="topbar-actions"><button class="btn-secondary" onclick="carregarMinhasReservas()">Atualizar</button></div>
+      </div>
+      <div class="panel-card">
+        <div id="lista-minhas" class="reservas-list"><div class="loading">Carregando...</div></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL DETALHES -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="fecharModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+      <div class="modal-icon" id="modal-icon"></div>
+      <h2 id="modal-nome"></h2>
+      <div class="modal-badges">
+        <span class="modal-badge">📍 <span id="modal-local"></span></span>
+        <span class="modal-badge">👥 <span id="modal-cap"></span></span>
+        <span class="modal-badge">🕐 <span id="modal-horario"></span></span>
+      </div>
+      <div class="modal-section"><h4>Sobre o espaço</h4><p id="modal-desc"></p></div>
+      <div class="modal-section"><h4>Quando usar</h4><p id="modal-uso"></p></div>
+      <button class="btn-primary modal-btn-reservar" onclick="reservarDoModal()">Reservar esta sala →</button>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://localhost:8000";
+    const usuario = localStorage.getItem("usuario");
+    const nome = localStorage.getItem("nome");
+    const perfil = localStorage.getItem("perfil");
+
+    if (!usuario || perfil !== "aluno") window.location.href = "login.html";
+
+    document.getElementById("user-name").textContent = nome;
+    document.getElementById("user-avatar").textContent = nome ? nome[0].toUpperCase() : "?";
+    document.getElementById("aluno-primeiro-nome").textContent = nome ? nome.split(' ')[0] : 'Aluno';
+
+    let salaSelecionadaId = null;
+    let salaModalAtual = null;
+    let slotSelecionado = null;
+    let salasCache = [];
+
+    function dataLocalHoje() {
+      const agora = new Date();
+      const ano = agora.getFullYear();
+      const mes = String(agora.getMonth() + 1).padStart(2, "0");
+      const dia = String(agora.getDate()).padStart(2, "0");
+      return `${ano}-${mes}-${dia}`;
+    }
+
+    const hoje = dataLocalHoje();
+
+    document.getElementById("data_escolhida").min = hoje;
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    function showTab(tab, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+      document.getElementById(`tab-${tab}`).classList.add('active');
+
+      if (el) el.classList.add('active');
+
+      if (tab === 'dashboard') atualizarDashboard();
+      if (tab === 'nova') carregarSalas();
+      if (tab === 'minhas') carregarMinhasReservas();
+    }
+
+    const SALA_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+    const MODAL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+
+    async function atualizarDashboard() {
+      await fetch(`${API}/reservas/expirar`, { method: "POST" }).catch(() => {});
+
+      const [salas, reservas] = await Promise.all([
+        fetch(`${API}/salas`).then(r => r.json()).catch(() => []),
+        fetch(`${API}/reservas/usuario/${usuario}`).then(r => r.json()).catch(() => []),
+      ]);
+
+      salasCache = salas;
+
+      const ativas = reservas.filter(r => r.status === 'ativa');
+
+      document.getElementById('stat-salas').textContent = salas.length || 0;
+      document.getElementById('stat-minhas').textContent = ativas.length || 0;
+
+      if (ativas.length) {
+        const proxima = ativas.sort((a, b) => new Date(a.data_inicio) - new Date(b.data_inicio))[0];
+
+        document.getElementById('stat-proxima').textContent = new Date(proxima.data_inicio).toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit'
+        });
+
+        document.getElementById('stat-proxima-sala').textContent = proxima.sala_nome;
+      } else {
+        document.getElementById('stat-proxima').textContent = '--';
+        document.getElementById('stat-proxima-sala').textContent = 'Sem reserva ativa';
+      }
+
+      renderMinhasReservas(reservas.slice(0, 4), 'dashboard-minhas');
+    }
+
+    async function carregarSalas() {
+      const grid = document.getElementById("salas-grid");
+
+      try {
+        const salas = await fetch(`${API}/salas`).then(r => r.json());
+        salasCache = salas;
+
+        grid.innerHTML = salas.map(s => `
+          <div class="sala-card">
+            <div class="sala-icon">${SALA_SVG}</div>
+            <div class="sala-info">
+              <div class="sala-nome">${s.nome}</div>
+              <div class="sala-detalhe">${s.localizacao || '-'} · Cap. ${s.capacidade}</div>
+              <div class="sala-horario-tag"><i class="bi bi-alarm"></i> ${s.hora_abertura} – ${s.hora_fechamento}</div>
+            </div>
+            <div class="sala-btns">
+              <button class="btn-info" onclick="abrirModal(${s.id})">Detalhes</button>
+              <button class="btn-reservar-card" onclick="selecionarSala(${s.id}, '${escapeHtml(s.nome)}')">Reservar</button>
+            </div>
+          </div>
+        `).join('');
+      } catch {
+        grid.innerHTML = '<div class="loading">Erro ao carregar salas.</div>';
+      }
+    }
+
+    async function abrirModal(id) {
+      try {
+        const s = await fetch(`${API}/salas/${id}`).then(r => r.json());
+
+        salaModalAtual = s;
+
+        document.getElementById("modal-icon").innerHTML = MODAL_SVG;
+        document.getElementById("modal-nome").textContent = s.nome;
+        document.getElementById("modal-local").textContent = s.localizacao || '-';
+        document.getElementById("modal-cap").textContent = s.capacidade + " pessoas";
+        document.getElementById("modal-horario").textContent = `${s.hora_abertura} às ${s.hora_fechamento}`;
+        document.getElementById("modal-desc").textContent = s.descricao || "Sem descrição cadastrada.";
+        document.getElementById("modal-uso").textContent = s.uso_recomendado || "Sem informação cadastrada.";
+        document.getElementById("modal-overlay").classList.remove("hidden");
+      } catch {
+        alert("Erro ao carregar detalhes.");
+      }
+    }
+
+    function fecharModal() {
+      document.getElementById("modal-overlay").classList.add("hidden");
+      salaModalAtual = null;
+    }
+
+    function reservarDoModal() {
+      if (!salaModalAtual) return;
+
+      fecharModal();
+      showTab('nova', document.querySelectorAll('.nav-item')[1]);
+      selecionarSala(salaModalAtual.id, salaModalAtual.nome);
+    }
+
+    function selecionarSala(id, nomeSala) {
+      salaSelecionadaId = id;
+      slotSelecionado = null;
+
+      const campoData = document.getElementById("data_escolhida");
+
+      document.getElementById("sala-selecionada-nome").textContent = nomeSala;
+
+      campoData.disabled = false;
+      campoData.min = hoje;
+      campoData.value = "";
+
+      document.getElementById("slots-container").style.display = "none";
+      document.getElementById("btn-confirmar").disabled = true;
+      document.getElementById("form-reserva").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function carregarSlots() {
+      const data = document.getElementById("data_escolhida").value;
+
+      if (!data || !salaSelecionadaId) return;
+
+      if (data < hoje) {
+        alert("Não é possível selecionar uma data anterior à atual.");
+        document.getElementById("data_escolhida").value = hoje;
+        return;
+      }
+
+      slotSelecionado = null;
+      document.getElementById("btn-confirmar").disabled = true;
+
+      const container = document.getElementById("slots-container");
+      const grid = document.getElementById("slots-grid");
+
+      grid.innerHTML = '<span style="color:#888;font-size:0.85rem">Carregando...</span>';
+      container.style.display = "block";
+
+      try {
+        const slots = await fetch(`${API}/reservas/slots/${salaSelecionadaId}?data=${data}`).then(r => r.json());
+
+        const agora = new Date();
+
+        const slotsFiltrados = slots.filter(slot => {
+          const inicio = new Date(slot.inicio);
+
+          if (data === hoje) {
+            return inicio > agora;
+          }
+
+          return true;
+        });
+
+        if (!slotsFiltrados.length) {
+          grid.innerHTML = '<span style="color:#888;font-size:0.85rem">Não há horários futuros disponíveis para esta data.</span>';
+          return;
+        }
+
+        grid.innerHTML = slotsFiltrados.map(s => `
+          <button 
+            class="slot-btn ${s.disponivel ? "slot-disponivel" : "slot-ocupado"}" 
+            onclick="${s.disponivel ? `selecionarSlot('${s.inicio}', '${s.fim}', this)` : ""}">
+            ${s.label}
+          </button>
+        `).join('');
+      } catch {
+        grid.innerHTML = '<span style="color:#cc0000;font-size:0.85rem">Erro ao carregar horários.</span>';
+      }
+    }
+
+    function selecionarSlot(inicio, fim, el) {
+      const agora = new Date();
+      const inicioSelecionado = new Date(inicio);
+
+      if (inicioSelecionado <= agora) {
+        alert("Não é possível selecionar um horário que já passou.");
+        return;
+      }
+
+      document.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("slot-ativo"));
+
+      el.classList.add("slot-ativo");
+      slotSelecionado = { inicio, fim };
+
+      document.getElementById("btn-confirmar").disabled = false;
+    }
+
+    function cancelarSelecao() {
+      salaSelecionadaId = null;
+      slotSelecionado = null;
+
+      document.getElementById("sala-selecionada-nome").textContent = "Escolha uma sala";
+      document.getElementById("data_escolhida").disabled = true;
+      document.getElementById("data_escolhida").value = "";
+      document.getElementById("slots-container").style.display = "none";
+      document.getElementById("btn-confirmar").disabled = true;
+    }
+
+    async function criarReserva() {
+      const msg = document.getElementById("msg-reserva");
+
+      if (!slotSelecionado) {
+        mostrarMsg(msg, "erro", "Selecione um horário disponível.");
+        return;
+      }
+
+      const agora = new Date();
+      const inicioSelecionado = new Date(slotSelecionado.inicio);
+
+      if (inicioSelecionado <= agora) {
+        mostrarMsg(msg, "erro", "Não é possível reservar um horário que já passou.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/reservas`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sala_id: salaSelecionadaId,
+            usuario,
+            data_inicio: slotSelecionado.inicio,
+            data_fim: slotSelecionado.fim
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          mostrarMsg(msg, "sucesso", `✓ ${data.mensagem}`);
+          cancelarSelecao();
+          atualizarDashboard();
+        } else {
+          mostrarMsg(msg, "erro", `✗ ${data.detail}`);
+        }
+      } catch {
+        mostrarMsg(msg, "erro", "Erro de conexão.");
+      }
+    }
+
+    async function carregarMinhasReservas() {
+      const lista = document.getElementById("lista-minhas");
+
+      lista.innerHTML = '<div class="loading">Carregando...</div>';
+
+      try {
+        await fetch(`${API}/reservas/expirar`, { method: "POST" });
+
+        const reservas = await fetch(`${API}/reservas/usuario/${usuario}`).then(r => r.json());
+
+        renderMinhasReservas(reservas, 'lista-minhas');
+      } catch {
+        lista.innerHTML = '<div class="empty">Erro ao carregar.</div>';
+      }
+    }
+
+    function renderMinhasReservas(reservas, containerId) {
+      const lista = document.getElementById(containerId);
+
+      reservas.sort((a, b) => new Date(a.data_inicio) - new Date(b.data_inicio));
+
+      if (!reservas.length) {
+        lista.innerHTML = '<div class="empty">Você ainda não tem reservas.</div>';
+        return;
+      }
+
+      lista.innerHTML = reservas.map(r => `
+        <div class="reserva-row ${r.status}">
+          <div class="reserva-col">
+            <div class="reserva-sala">${r.sala_nome}</div>
+            <div class="reserva-local">${r.localizacao || '-'}</div>
+          </div>
+          <div class="reserva-col">
+            <div class="reserva-data"><i class="bi bi-calendar2"></i> ${fmt(r.data_inicio)}</div>
+          </div>
+          <div class="reserva-col">
+            <div class="reserva-data muted">até ${fmt(r.data_fim)}</div>
+          </div>
+          <div class="reserva-col">
+            <span class="badge badge-${r.status}">
+              ${r.status === "concluida" ? "CONCLUÍDA" : r.status.toUpperCase()}
+            </span>
+          </div>
+          <div class="reserva-col">
+            ${r.status === "ativa" ? `<button class="btn-cancel" onclick="cancelar(${r.id})">Cancelar</button>` : ""}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function cancelar(id) {
+      if (!confirm("Cancelar esta reserva?")) return;
+
+      const res = await fetch(`${API}/reservas/${id}`, { method: "DELETE" });
+
+      if (res.ok) {
+        carregarMinhasReservas();
+        atualizarDashboard();
+      }
+    }
+
+    function fmt(iso) {
+      return new Date(iso).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function mostrarMsg(el, tipo, texto) {
+      el.textContent = texto;
+      el.className = `msg ${tipo}`;
+
+      setTimeout(() => {
+        el.className = "msg hidden";
+      }, 4000);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("'", "&#39;")
+        .replaceAll('"', '&quot;');
+    }
+
+    carregarSalas();
+    atualizarDashboard();
+  </script>
+</body>
+</html>
