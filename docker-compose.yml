@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:16
+    container_name: reservas_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: reservas
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: reservas_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: reservas_rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  redis:
+    image: redis:7-alpine
+    container_name: reservas_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  api:
+    build: ./backend
+    container_name: reservas_api
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - rabbitmq
+      - redis
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/reservas
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq/
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+
+  worker:
+    build: ./backend
+    container_name: reservas_worker
+    restart: always
+    command: python worker.py
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq/
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - ./backend:/app
+
+volumes:
+  pgdata:
