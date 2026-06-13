@@ -1,6 +1,6 @@
 # 🎓 Booking System
 
-> Sistema distribuído de reservas de laboratórios, salas de reunião e auditórios da ATITUS Educação.
+> Sistema distribuído de reservas de laboratórios, salas de reunião e auditórios de uma instituição.
 
 O **Booking System** é uma aplicação que permite que professores reservem laboratórios e salas da faculdade de forma simples e organizada. O sistema controla conflitos de horário automaticamente, exibe apenas os slots disponíveis e notifica via fila de mensagens a cada reserva realizada.
 
