@@ -87,7 +87,7 @@ Na primeira execução, aguarde o download das imagens.
 | PATCH | `/salas/{id}` | Edita sala |
 | DELETE | `/salas/{id}` | Remove sala |
 | GET | `/reservas` | Lista todas as reservas |
-| GET | `/reservas/usuario/{usuario}` | Reservas de um aluno |
+| GET | `/reservas/usuario/{usuario}` | Reservas de um professor |
 | GET | `/reservas/slots/{sala_id}` | Slots disponíveis por data |
 | POST | `/reservas` | Cria reserva |
 | DELETE | `/reservas/{id}` | Cancela reserva |
